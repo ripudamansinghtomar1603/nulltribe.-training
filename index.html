@@ -99,6 +99,7 @@
   
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
   
+  /* Tile Styles: White/Blue unclicked, Orange dot when clicked */
   .tile{position:relative;background:var(--paper);border:2px solid transparent;border-radius:20px;padding:24px;cursor:pointer;transition:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);text-align:left;min-height:120px;box-shadow:var(--sh-soft)}
   .tile:hover{border-color:var(--border);box-shadow:var(--sh);transform:translateY(-4px)}
   .tile .term{font-weight:600;font-size:17px;color:var(--navy)}
@@ -107,8 +108,10 @@
   .tile.open{border-color:var(--blue);background:#F7F9FF;box-shadow:0 12px 32px rgba(59,101,232,.08);transform:translateY(-2px)}
   .tile.open .hint{opacity:0;height:0;margin:0}
   .tile.open .def{max-height:200px;opacity:1;margin-top:12px}
-  .tile .dot{position:absolute;top:20px;right:20px;width:10px;height:10px;border-radius:50%}
-  .tile.g-blue .dot{background:var(--blue)}.tile.g-teal .dot{background:var(--teal)}.tile.g-orange .dot{background:var(--orange)}
+  
+  /* Dynamic Dot */
+  .tile .dot{position:absolute;top:20px;right:20px;width:10px;height:10px;border-radius:50%;background:var(--blue);transition:background 0.3s ease;}
+  .tile.open .dot{background:var(--orange);}
   
   .formula{font-family:var(--mono);font-size:clamp(16px,2.5vw,20px);background:var(--paper);box-shadow:var(--sh-soft);border-radius:20px;padding:32px;margin-top:32px;text-align:center;line-height:1.7;border:1px solid var(--border); transition: all 0.5s cubic-bezier(0.16,1,0.3,1);}
   .formula:hover{box-shadow: var(--sh); transform: translateY(-2px)}
@@ -252,7 +255,7 @@
 <script>
 /* ================= CONTENT ================= */
 const FOUNDATIONS = [
-  {g:"blue",label:"The building blocks",items:[
+  {label:"The building blocks",items:[
     ["Asset","what's worth protecting","Anything of value: cash, customer data, your records."],
     ["Threat","what could cause harm","A thief, a flood, a hacker, a careless click."],
     ["Vulnerability","the weakness","A gap a threat can exploit: an unlocked door, a shared password, no backup."],
@@ -261,12 +264,12 @@ const FOUNDATIONS = [
     ["Impact","how bad","The damage done when it does."],
     ["Control","the safeguard","Anything you add to cut likelihood or impact: a lock, a backup."],
   ]},
-  {g:"teal",label:"What we're protecting — the C-I-A triad",items:[
+  {label:"What we're protecting — the C-I-A triad",items:[
     ["Confidentiality","seen only by the right people","Information stays private to those allowed to see it."],
     ["Integrity","accurate and unaltered","Information can't be changed or corrupted without notice."],
     ["Availability","there when you need it","Systems and data are up and reachable when required."],
   ]},
-  {g:"orange",label:"Four ways to treat a risk",items:[
+  {label:"Four ways to treat a risk",items:[
     ["Mitigate","reduce it","Add controls to cut the chance or the damage. Risk drops, never to zero."],
     ["Avoid","remove it","Stop the risky activity entirely — always at a cost."],
     ["Transfer","share it","Shift the burden to someone else: insurance, a vendor."],
@@ -276,7 +279,7 @@ const FOUNDATIONS = [
 
 const SCENES = [
   {
-    img: "https://images.unsplash.com/photo-1614064641913-6b71f3bb3343?auto=format&fit=crop&w=800&q=80",
+    img: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=800&q=80",
     id:"door", title:"The Unlocked Back Door", hook:"₹50,000 and a latch that only looks shut.",
     setup:["<p>Saturday night. Raj counts ₹50,000 — his best day in weeks — and drops it in the metal box under the counter. Front shutter down.</p><p>But the back delivery door? Its latch has been loose for months. It <em>looks</em> shut. He's tired. He goes home.</p>"],
     incident:["<p>Nothing happens tonight.</p><p>But for eight hours, ₹50,000 sat behind a door anyone could lean on and open. No lock. No alarm. The only guard on duty was luck.</p>"],
@@ -330,7 +333,7 @@ const SCENES = [
     insight:"A threat can be invisible — the attacker just <b>sat there and listened</b>."
   },
   {
-    img: "https://images.unsplash.com/photo-1507925922893-a981ad6f663c?auto=format&fit=crop&w=800&q=80",
+    img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80",
     id:"insider", title:"The Angry Ex-Employee", hook:"A threat that walked out the door — and kept the keys.",
     setup:["<p>Raj's proudest asset: a customer list — names, numbers, addresses, favourite orders. It lives in one app the whole team shares. One login. One password.</p><p>Everyone uses it — including Vikram, fired last month for skimming the till.</p>"],
     incident:["<p>Nobody changed the password. Vikram's phone still had it saved.</p><p>Three weeks on, Raj's regulars start getting texts from a new café across town — by name, by usual order. Vikram walked out with two years of customers in his pocket. He broke nothing.</p>"],
@@ -431,80 +434,80 @@ function generatePDF(e) {
   btn.innerText = 'Generating PDF...';
   btn.style.opacity = '0.7';
 
-  // Initialize jsPDF (Landscape, points, A4)
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
   const width = doc.internal.pageSize.getWidth();
   const height = doc.internal.pageSize.getHeight();
 
-  // 1. Draw Geometric Borders
+  // Geometric Borders
   doc.setDrawColor(59, 101, 232); // Blue
   doc.setLineWidth(4);
   doc.rect(25, 20, width - 50, height - 40);
-
   doc.setDrawColor(228, 232, 240); // Border Gray
   doc.setLineWidth(1);
   doc.rect(32, 27, width - 64, height - 54);
 
-  // 2. Logo Setup (nulltribe.)
+  // Logo Setup (nulltribe. TRAININGS)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(32);
   const w1 = doc.getTextWidth("null");
   const w2 = doc.getTextWidth("tribe");
   const w3 = doc.getTextWidth(".");
-  const logoStartX = (width - (w1 + w2 + w3)) / 2;
+  
+  doc.setFontSize(14); // Size for TRAININGS tag
+  const w4 = doc.getTextWidth(" TRAININGS");
+  
+  const totalW = w1 + w2 + w3 + w4;
+  const logoStartX = (width - totalW) / 2;
 
+  // Draw Logo
+  doc.setFontSize(32);
   doc.setTextColor(59, 101, 232); // Blue
-  doc.text("null", logoStartX, 85);
+  doc.text("null", logoStartX, 100);
   doc.setTextColor(26, 31, 46); // Navy
-  doc.text("tribe", logoStartX + w1, 85);
+  doc.text("tribe", logoStartX + w1, 100);
   doc.setTextColor(249, 115, 22); // Orange
-  doc.text(".", logoStartX + w1 + w2, 85);
+  doc.text(".", logoStartX + w1 + w2, 100);
 
-  // 3. Sub-Eyebrow
-  doc.setFontSize(10);
+  // Draw TRAININGS tag
+  doc.setFontSize(14);
   doc.setTextColor(136, 146, 164); // Muted
-  doc.text("SECURITY ORCHESTRATOR PLATFORM", width / 2, 115, { align: "center", charSpace: 2 });
+  doc.text(" TRAININGS", logoStartX + w1 + w2 + w3, 100);
 
-  // 4. Main Title
+  // Main Title
   doc.setFontSize(40);
-  doc.setTextColor(26, 31, 46); // Navy
-  doc.text("Certificate of Completion", width / 2, 200, { align: "center" });
+  doc.setTextColor(26, 31, 46); 
+  doc.text("Certificate of Completion", width / 2, 180, { align: "center" });
 
-  // 5. Context line
   doc.setFontSize(16);
   doc.setFont("helvetica", "normal");
-  doc.setTextColor(74, 85, 104); // Text2
-  doc.text("This credential validates that", width / 2, 255, { align: "center" });
+  doc.setTextColor(74, 85, 104);
+  doc.text("This credential validates that", width / 2, 240, { align: "center" });
 
-  // 6. Recipient Name
   doc.setFontSize(36);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(59, 101, 232); // Blue
-  doc.text(userName, width / 2, 315, { align: "center" });
+  doc.setTextColor(59, 101, 232);
+  doc.text(userName, width / 2, 305, { align: "center" });
 
-  // Underline Name
   const nameW = doc.getTextWidth(userName);
   doc.setDrawColor(59, 101, 232);
   doc.setLineWidth(2);
-  doc.line((width/2) - (nameW/2) - 10, 325, (width/2) + (nameW/2) + 10, 325);
+  doc.line((width/2) - (nameW/2) - 10, 315, (width/2) + (nameW/2) + 10, 315);
 
-  // 7. Course details
   doc.setFontSize(15);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(74, 85, 104);
-  doc.text("has successfully reviewed and mastered all interactive modules for:", width / 2, 380, { align: "center" });
+  doc.text("has successfully reviewed and mastered all interactive modules for:", width / 2, 370, { align: "center" });
 
   doc.setFontSize(24);
   doc.setFont("helvetica", "bold");
-  doc.setTextColor(26, 31, 46); // Navy
-  doc.text("Information Security Risk Fundamentals — Phase 1", width / 2, 420, { align: "center" });
+  doc.setTextColor(26, 31, 46); 
+  doc.text("Information Security Risk Fundamentals — Phase 1", width / 2, 410, { align: "center" });
 
-  // 8. Footer block
+  // Footer block
   const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const bottomY = 500;
 
-  // Date (Left)
   doc.setFontSize(12);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(26, 31, 46);
@@ -514,7 +517,6 @@ function generatePDF(e) {
   doc.setTextColor(74, 85, 104);
   doc.text(dateStr, 80, bottomY + 20);
 
-  // Sign off (Right)
   doc.setFont("helvetica", "bold");
   doc.setTextColor(26, 31, 46);
   doc.text("Issued & Verified by:", width - 80, bottomY, { align: "right" });
@@ -523,13 +525,12 @@ function generatePDF(e) {
   doc.setTextColor(136, 146, 164);
   doc.text("nulltribe.", width - 80, bottomY + 20, { align: "right" });
 
-  // Download logic
   setTimeout(() => {
     doc.save(`nulltribe_${userName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_certificate.pdf`);
     btn.innerText = 'Download PDF';
     btn.style.opacity = '1';
     closeCertModal();
-  }, 500); // Slight delay for visual feedback
+  }, 500);
 }
 
 
@@ -557,7 +558,7 @@ function home(){
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[0].label}</div>
         <div class="grid">
           ${FOUNDATIONS[0].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[0].g} animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -570,7 +571,7 @@ function home(){
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[1].label}</div>
         <div class="grid">
           ${FOUNDATIONS[1].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[1].g} animate-in delay-${(ii%3)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile animate-in delay-${(ii%3)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -583,7 +584,7 @@ function home(){
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[2].label}</div>
         <div class="grid">
           ${FOUNDATIONS[2].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[2].g} animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -631,7 +632,7 @@ function home(){
         ${MAP.map((m,i)=>`<div class="mrow animate-in delay-${(i%2)+1}"><div class="mterm">${m[0]}<small>${m[1]}</small></div><div class="mdef">${m[2]}</div></div>`).join('')}
       </div>
       <div class="closing animate-in text-constrain">
-        <p class="big">There's no single right answer. What matters is a <b>conscious, informed decision</b> — that is management.</p>
+        <p class="big">There's no single right answer. What matters is a <b>conscious, informed decision</b> — that is risk management.</p>
         <p class="sub">Mitigate, transfer, avoid, accept: each is valid in context. The failure is never the choice — it's choosing without looking.</p>
         ${certHtml}
       </div>
@@ -719,7 +720,7 @@ function peek(i){const b=document.getElementById('pb'+i);b.classList.toggle('sho
 function finish(){
   st.done[st.scene] = true; 
   st.view = 'home'; 
-  render(false); // Do not scroll to the absolute top of the page
+  render(false); // Does not scroll to top
   
   if(allDone()){
     const el=document.getElementById('terminology'); 
@@ -728,7 +729,7 @@ function finish(){
       setTimeout(()=>el.scrollIntoView({behavior:'smooth'}),200);
     }
   } else {
-    // If there are still scenarios left, scroll to the scenario hub
+    // Scroll cleanly back to the scenario hub menu
     const hub = document.getElementById('scenario-hub');
     if(hub) {
       setTimeout(() => hub.scrollIntoView({behavior:'smooth', block:'start'}), 50);
