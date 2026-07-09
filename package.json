@@ -1,0 +1,24 @@
+{
+  "name": "nulltribe-training-backend",
+  "version": "1.0.0",
+  "description": "Backend service for nulltribe info-sec scenario-based training platform, tracking progress and generating completion certificates.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "nulltribe",
+    "security",
+    "training",
+    "express",
+    "pdfkit"
+  ],
+  "author": "nulltribe.",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "pdfkit": "^0.13.0"
+  }
+}
