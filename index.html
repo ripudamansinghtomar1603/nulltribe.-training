@@ -1,196 +1,394 @@
-const express = require('express');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-const PDFDocument = require('pdfkit');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Day at Sharma's Café — Risk Fundamentals · nulltribe.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-const app = express();
+<style>
+  :root{
+    --blue:#3B65E8;--blue-dk:#2f52c4;--orange:#F97316;
+    --bg:#F8F9FC;--alt:#F0F2F8;--paper:#FFF;
+    --navy:#1A1F2E;--t2:#4A5568;--muted:#8892A4;--border:#E4E8F0;
+    --green:#16A34A;--red:#EF4444;--violet:#7c3aed;--teal:#0e8a89;
+    --sh:0 20px 40px -12px rgba(26,31,46,.12);
+    --sh-soft:0 4px 16px rgba(26,31,46,.05);
+    --sans:'Poppins',sans-serif;
+    --mono:'JetBrains Mono',monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--navy);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased}
+  
+  .wrap{max-width:1280px;margin:0 auto;padding:0 32px}
+  .text-constrain{max-width: 900px; margin-left: auto; margin-right: auto;}
+  
+  h1{font-family:var(--sans);font-weight:600;font-size:clamp(36px,6vw,56px);line-height:1.1;margin:0 0 16px;letter-spacing:-.02em}
+  h2{font-family:var(--sans);font-weight:600;font-size:clamp(28px,4.5vw,38px);line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+  .lede{font-family:var(--sans);font-weight:400;font-size:20px;color:var(--t2);margin:0 0 8px;line-height:1.6}
+  .eyebrow{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:12px}
+  .eyebrow.o{color:var(--orange)}
 
-// Enable CORS for frontend communication
-app.use(cors());
-app.use(express.json());
+  /* --- ZEBEYOND ERP STYLE ANIMATIONS --- */
+  .reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(50px);
+    transition: opacity 0.7s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+  .reveal-on-scroll.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+  .delay-1 { transition-delay: 0.05s; }
+  .delay-2 { transition-delay: 0.15s; }
+  .delay-3 { transition-delay: 0.25s; }
+  .delay-4 { transition-delay: 0.35s; }
+  .delay-5 { transition-delay: 0.45s; }
+  
+  @keyframes slideUpFadeERP {
+    from { opacity: 0; transform: translateY(40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .screen{display:none;animation:slideUpFadeERP 1s cubic-bezier(0.16, 1, 0.3, 1) both;padding:60px 0 100px}
+  .screen.on{display:block}
 
-const SECRET_KEY = 'your-super-secret-key-change-this-in-production';
+  @keyframes slowPan {
+    0% { transform: scale(1.02) translate(0, 0); }
+    50% { transform: scale(1.05) translate(-0.5%, 0.5%); }
+    100% { transform: scale(1.02) translate(0, 0); }
+  }
+  @keyframes checkPopERP {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
 
-// --- MOCK DATABASE ---
-const users = [];       
-const progressDb = {};  
+  /* top bar */
+  .top{position:sticky;top:0;z-index:20;background:rgba(248,249,252,.9);backdrop-filter:blur(16px);box-shadow:0 1px 0 rgba(26,31,46,.06)}
+  .top .wrap{display:flex;align-items:center;justify-content:space-between;height:70px}
+  .brand{font-weight:700;font-size:20px;letter-spacing:-.02em;text-decoration:none;cursor:pointer;transition: opacity 0.3s ease;}
+  .brand:hover {opacity: 0.7;}
+  .brand .n{color:var(--blue)}.brand .t{color:var(--navy)}.brand .d{color:var(--orange)}
+  .prog{display:flex;gap:10px}
+  .pip{width:12px;height:12px;border-radius:50%;background:var(--border);transition:all 0.8s cubic-bezier(0.16, 1, 0.3, 1)}
+  .pip.done{background:var(--green);}
 
-// --- AUTHENTICATION MIDDLEWARE ---
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (!token) {
-        return res.status(401).json({ error: 'Access denied. Authentication token missing.' });
-    }
+  /* Buttons */
+  .btn{font-family:var(--sans);font-weight:600;font-size:16px;background:var(--blue);color:#fff;border:none;border-radius:50px;padding:16px 36px;cursor:pointer;transition:all 0.4s cubic-bezier(0.16, 1, 0.3, 1);text-decoration:none;display:inline-block;box-shadow:0 4px 12px rgba(59,101,232,0.15)}
+  .btn:hover{background:var(--blue-dk);transform:translateY(-2px);box-shadow:0 8px 24px rgba(59,101,232,0.25)}
+  .btn:active{transform:translateY(0);box-shadow:0 2px 8px rgba(59,101,232,0.15)}
+  .btn.ghost{background:transparent;color:var(--blue);box-shadow:inset 0 0 0 2px var(--border);}
+  .btn.ghost:hover{box-shadow:inset 0 0 0 2px var(--blue);background:var(--alt)}
 
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: 'Invalid or expired session token. Please log in again.' });
-        }
-        req.user = user;
-        next();
-    });
-};
+  /* Modal UI */
+  .modal-overlay {display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(26,31,46,0.6); backdrop-filter:blur(4px); z-index:100; align-items:center; justify-content:center; animation:fadeIn 0.3s ease;}
+  .modal-overlay.open {display:flex;}
+  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  .modal-box {background:var(--paper); width:100%; max-width:420px; border-radius:24px; padding:36px; box-shadow:var(--sh); position:relative;}
+  .modal-close {position:absolute; top:24px; right:24px; background:none; border:none; font-size:24px; color:var(--muted); cursor:pointer;}
+  .form-group {margin-bottom:24px;}
+  .form-group label {display:block; font-family:var(--mono); font-size:12px; font-weight:600; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em;}
+  .form-group input {width:100%; padding:14px 16px; border-radius:12px; border:2px solid var(--border); font-family:var(--sans); font-size:15px; color:var(--navy); outline:none; transition:border-color 0.2s;}
+  .form-group input:focus {border-color:var(--blue);}
 
-// --- API ROUTES ---
+  /* ---------- FOUNDATIONS ---------- */
+  .sect{margin-top:80px}
+  .sect-h{display:flex;align-items:baseline;gap:12px;margin-bottom:6px}
+  .sect-h .num{font-family:var(--mono);font-size:20px;color:var(--muted)}
+  .sect-sub{color:var(--t2);font-size:16px;margin:0 0 32px}
+  
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px}
+  
+  .tile{position:relative;background:var(--paper);border:2px solid transparent;border-radius:20px;padding:24px;cursor:pointer;transition:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);text-align:left;min-height:120px;box-shadow:var(--sh-soft)}
+  .tile:hover{border-color:var(--border);box-shadow:var(--sh);transform:translateY(-4px)}
+  .tile .term{font-weight:600;font-size:17px;color:var(--navy)}
+  .tile .hint{font-size:13px;color:var(--muted);margin-top:4px;transition:opacity .3s ease}
+  .tile .def{font-size:14.5px;color:var(--t2);line-height:1.5;margin-top:8px;max-height:0;opacity:0;overflow:hidden;transition:max-height .6s cubic-bezier(0.16, 1, 0.3, 1), opacity .4s ease}
+  .tile.open{border-color:var(--blue);background:#F7F9FF;box-shadow:0 12px 32px rgba(59,101,232,.08);transform:translateY(-2px)}
+  .tile.open .hint{opacity:0;height:0;margin:0}
+  .tile.open .def{max-height:200px;opacity:1;margin-top:12px}
+  .tile .dot{position:absolute;top:20px;right:20px;width:10px;height:10px;border-radius:50%}
+  .tile.g-blue .dot{background:var(--blue)}.tile.g-teal .dot{background:var(--teal)}.tile.g-orange .dot{background:var(--orange)}
+  
+  .formula{font-family:var(--mono);font-size:clamp(16px,2.5vw,20px);background:var(--paper);box-shadow:var(--sh-soft);border-radius:20px;padding:32px;margin-top:32px;text-align:center;line-height:1.7;border:1px solid var(--border); transition: all 0.5s cubic-bezier(0.16,1,0.3,1);}
+  .formula:hover{box-shadow: var(--sh); transform: translateY(-2px)}
+  .formula .a{color:var(--blue);font-weight:600}.formula .v{color:var(--orange);font-weight:600}.formula .op{color:var(--muted)}
 
-app.post('/api/signup', (req, res) => {
-    const { name, email, password } = req.body;
+  /* ---------- SCENARIO HUB ---------- */
+  .scn-grid{display:grid;grid-template-columns:1fr;gap:28px;margin-top:32px}
+  @media(min-width:768px){.scn-grid{grid-template-columns:1fr 1fr}}
+  
+  .card-scn{display:flex;flex-direction:column;text-align:left;background:var(--paper);border:2px solid transparent;border-radius:24px;padding:0;cursor:pointer;transition:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);position:relative;overflow:hidden;box-shadow:var(--sh-soft)}
+  .card-scn:hover{border-color:var(--border);transform:translateY(-6px);box-shadow:var(--sh)}
+  .card-scn-img{height:220px;width:100%;overflow:hidden;position:relative;background:#EAF0FF}
+  .card-scn-img img{width:100%;height:100%;object-fit:contain;padding:12px;transition:transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)} 
+  .card-scn:hover .card-scn-img img{transform:scale(1.04)}
+  .card-scn-body{padding:32px;}
+  .card-scn .idx{font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+  .card-scn .st{font-family:var(--sans);font-size:24px;font-weight:600;line-height:1.25;color:var(--navy)}
+  .card-scn .sh{font-size:15px;color:var(--t2);margin-top:10px;line-height:1.6;flex-grow:1}
+  .card-scn .go{margin-top:24px;font-size:15px;font-weight:600;color:var(--blue);display:inline-flex;align-items:center;gap:6px; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);}
+  .card-scn:hover .go{transform: translateX(4px);}
+  .card-scn.done{background:var(--alt);box-shadow:none;border-color:transparent}
+  .card-scn.done .card-scn-img img{filter:grayscale(100%) opacity(0.5)}
+  .card-scn.done .st,.card-scn.done .idx,.card-scn.done .sh{color:var(--muted)}
+  .card-scn.done .go{color:var(--green)}
+  
+  .check{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;background:var(--green);display:none;place-items:center;box-shadow:0 4px 12px rgba(22, 163, 74, 0.4);z-index:10}
+  .card-scn.done .check{display:grid;animation:checkPopERP .6s cubic-bezier(0.16, 1, 0.3, 1) both;}
+  .check svg{width:18px;height:18px}
 
-    if (!name || !email || !password) {
-        return res.status(400).json({ error: 'All fields are required.' });
-    }
+  /* ---------- SCENE PLAYER ---------- */
+  .hero-banner {height:300px;border-radius:24px;overflow:hidden;margin-bottom:32px;box-shadow:var(--sh-soft);position:relative;background:#EAF0FF;display:grid;place-items:center}
+  .hero-banner img {width:100%;height:100%;object-fit:contain;padding:20px;animation:slowPan 20s infinite alternate ease-in-out;}
 
-    if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
-        return res.status(400).json({ error: 'Account already exists.' });
-    }
-    
-    const newUser = { 
-        id: Date.now().toString(), 
-        name: name.trim(), 
-        email: email.toLowerCase().trim(), 
-        password 
-    };
-    
-    users.push(newUser);
-    progressDb[newUser.id] = [false, false, false, false]; 
-    
-    const token = jwt.sign({ id: newUser.id, name: newUser.name }, SECRET_KEY, { expiresIn: '24h' });
-    
-    res.status(201).json({ 
-        token, 
-        user: { name: newUser.name, email: newUser.email },
-        progress: progressDb[newUser.id]
-    });
-});
+  .card{background:var(--paper);border:none;border-radius:24px;box-shadow:var(--sh-soft);padding:40px;margin:24px auto; transition: box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)}
+  .card:hover{box-shadow: var(--sh)}
+  .story{font-family:var(--sans);font-weight:400;font-size:18.5px;line-height:1.7;color:var(--navy)}
+  .story p{margin:0 0 16px}.story p:last-child{margin:0}
+  .flag{font-family:var(--mono);display:inline-flex;align-items:center;gap:8px;background:#FEF3E9;color:#c2570a;font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.05em;padding:6px 14px;border-radius:50px;margin-bottom:20px}
+  .flag::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--orange)}
 
-app.post('/api/login', (req, res) => {
-    const { email, password } = req.body;
+  .check-q{background:var(--paper);box-shadow:var(--sh-soft);border-radius:20px;padding:40px;margin:32px auto;border:1px solid var(--border)}
+  .check-q .q{font-family:var(--sans);font-size:20px;font-weight:600;margin:0 0 20px}
+  .qopt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid transparent;border-radius:16px;padding:16px 20px;margin-bottom:12px;font-size:16px;color:var(--navy);cursor:pointer;transition:all .4s cubic-bezier(0.16, 1, 0.3, 1)}
+  .qopt:hover{background:var(--alt);border-color:var(--border);}
+  .qopt.ok{border-color:var(--green);background:#F0FBF4}.qopt.no{border-color:var(--red);background:#FEF2F2;opacity:.8}
+  .qfb{font-size:15px;color:var(--t2);margin:-4px 4px 16px;display:none;line-height:1.5;padding-left:16px;border-left:3px solid var(--border)}.qfb.show{display:block;animation:slideUpFadeERP .6s cubic-bezier(0.16, 1, 0.3, 1) both}
 
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required.' });
-    }
+  .dhead{font-family:var(--sans);font-size:26px;font-weight:700;text-align:center;margin:48px 0 8px}
+  .dsub{text-align:center;color:var(--muted);font-size:16px;margin-bottom:32px}
+  
+  .opts{display:grid;gap:16px}
+  @media(min-width:800px){.opts{grid-template-columns:1fr 1fr}}
+  
+  .opt{text-align:left;background:var(--paper);border:2px solid transparent;border-radius:20px;padding:22px 26px;cursor:pointer;transition:all .5s cubic-bezier(0.16, 1, 0.3, 1);box-shadow:var(--sh-soft);display:flex;flex-direction:column}
+  .opt:hover{border-color:var(--border);transform:translateY(-4px);box-shadow:var(--sh)}
+  .opt:active{transform:translateY(0)}
+  .opt .lbl{display:flex;gap:16px;align-items:center}
+  .opt .n{font-family:var(--mono);flex:none;width:32px;height:32px;border-radius:10px;background:var(--alt);color:var(--blue);font-weight:600;font-size:14px;display:grid;place-items:center; transition: background 0.4s}
+  .opt:hover .n{background:var(--bg)}
+  .opt .a{font-size:16px;font-weight:500;line-height:1.4}
 
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase().trim() && u.password === password);
-    
-    if (!user) {
-        return res.status(400).json({ error: 'Invalid email or password.' });
-    }
-    
-    const token = jwt.sign({ id: user.id, name: user.name }, SECRET_KEY, { expiresIn: '24h' });
-    
-    res.json({ 
-        token, 
-        user: { name: user.name, email: user.email },
-        progress: progressDb[user.id] || [false, false, false, false] 
-    });
-});
+  .conseq{font-family:var(--sans);font-size:17.5px;line-height:1.65;padding:28px 32px;border-radius:20px;margin-bottom:24px;border-left:5px solid;box-shadow:var(--sh-soft)}
+  .conseq.good{background:#F0FBF4;border-color:var(--green)}
+  .conseq.mixed{background:#FEF9EC;border-color:#E0A93B}
+  .conseq.bad{background:#FEF2F2;border-color:var(--red)}
+  .reveal{background:var(--navy);color:#EAF0FF;border-radius:24px;padding:36px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)}
+  .reveal:hover{transform: translateY(-2px); box-shadow: 0 16px 40px rgba(26,31,46,.2)}
+  .reveal .badge{font-family:var(--mono);display:inline-block;font-weight:600;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:#fff;padding:6px 16px;border-radius:50px;margin-bottom:16px;background:var(--blue)}
+  .badge.transfer{background:var(--violet)}.badge.avoid{background:var(--orange)}.badge.accept{background:var(--teal)}
+  .reveal p{margin:0;font-size:16px;line-height:1.6;color:#D6DEF5}.reveal p b{color:#fff;font-weight:600}
+  
+  .peek{margin-top:36px}
+  .peek .pt{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:20px}
+  .pbody{background:var(--alt);border-radius:16px;padding:24px;margin-top:16px;display:none;border:1px solid var(--border)}
+  .pbody.show{display:block;animation:slideUpFadeERP .6s cubic-bezier(0.16, 1, 0.3, 1) both}
+  .pbody .ps{font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);margin-bottom:8px}
+  .pbody .ps.transfer{color:var(--violet)}.pbody .ps.avoid{color:#c2570a}.pbody .ps.accept{color:var(--teal)}
+  .pbody p{margin:0;font-size:15px;color:var(--t2);line-height:1.6}
+  
+  .insight{display:flex;align-items:center;gap:20px;background:#F5F8FF;border:none;border-radius:20px;padding:24px 32px;margin-top:36px; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1)}
+  .insight:hover{transform: translateY(-2px); box-shadow: 0 8px 24px rgba(59,101,232,.08)}
+  .insight .b{font-size:24px;background:#fff;padding:12px;border-radius:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06)}
+  .insight .x{font-size:16px;line-height:1.6}.insight .x b{color:var(--blue);font-weight:600}
 
-app.post('/api/progress', authenticateToken, (req, res) => {
-    const { scenarioIndex } = req.body;
-    
-    if (scenarioIndex === undefined || scenarioIndex < 0 || scenarioIndex > 3) {
-        return res.status(400).json({ error: 'Invalid scenario index.' });
-    }
-    
-    if (!progressDb[req.user.id]) {
-        progressDb[req.user.id] = [false, false, false, false];
-    }
-    
-    progressDb[req.user.id][scenarioIndex] = true;
-    
-    res.json({ success: true, progress: progressDb[req.user.id] });
-});
+  /* ---------- TERMINOLOGY ---------- */
+  #terminology{display:none}
+  #terminology.unlocked{display:block}
+  
+  .map{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}
+  @media(min-width:1024px){.map{grid-template-columns:1fr 1fr;gap:20px;}}
+  
+  .mrow{display:grid;grid-template-columns:1fr;gap:6px;background:var(--paper);border:none;border-radius:20px;padding:24px 28px;box-shadow:var(--sh-soft); transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1)}
+  .mrow:hover{transform: translateY(-3px); box-shadow: var(--sh)}
+  @media(min-width:600px){.mrow{grid-template-columns:170px 1fr;gap:20px;align-items:center}}
+  .mterm{font-weight:600;color:var(--blue);font-size:16px}
+  .mterm small{font-family:var(--mono);display:block;font-weight:500;color:var(--muted);font-size:12.5px;margin-top:4px}
+  .mdef{font-family:var(--sans);font-size:15.5px;color:var(--t2);line-height:1.6}.mdef b{color:var(--navy);font-weight:600}
 
-/**
- * @route   GET /api/certificate
- * @desc    Generate fixed, absolutely positioned PDF certificate
- */
-app.get('/api/certificate', authenticateToken, (req, res) => {
-    const userProgress = progressDb[req.user.id];
-    
-    if (!userProgress || !userProgress.every(Boolean)) {
-        return res.status(403).json({ error: 'Complete all four training scenarios to unlock your certificate.' });
-    }
+  .closing{background:var(--navy);color:#fff;border-radius:24px;padding:48px 40px;text-align:center;margin-top:40px; transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1)}
+  .closing:hover{transform: translateY(-2px); box-shadow: 0 20px 40px rgba(26,31,46,.2)}
+  .closing .big{font-family:var(--sans);font-weight:600;font-size:clamp(24px,3.6vw,32px);line-height:1.35;margin:0 0 12px}.closing .big b{color:#8db0ff}
+  .closing .sub{color:#B8C4E0;font-size:16px;margin:0}
 
-    // Set margins to 0 to prevent PDFKit from triggering automatic blank pages
-    const doc = new PDFDocument({ 
-        layout: 'landscape', 
-        size: 'A4',
-        margins: { top: 0, bottom: 0, left: 0, right: 0 }
-    });
+  footer{border-top:1px solid var(--border);padding:40px 0 60px;text-align:center;margin-top:60px}
+  footer p{color:var(--muted);font-size:14px;margin:8px 0 0}
+</style>
+</head>
+<body>
 
-    const sanitizedFilename = req.user.name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="nulltribe_${sanitizedFilename}_certificate.pdf"`);
-    
-    doc.pipe(res);
+<div class="top"><div class="wrap">
+  <span class="brand" onclick="goHome()"><span class="n">null</span><span class="t">tribe</span><span class="d">.</span></span>
+  <div class="prog" aria-hidden="true">
+    <span class="pip" data-p="0"></span><span class="pip" data-p="1"></span>
+    <span class="pip" data-p="2"></span><span class="pip" data-p="3"></span>
+  </div>
+</div></div>
 
-    const pageWidth = doc.page.width;
-    const pageHeight = doc.page.height;
+<div class="modal-overlay" id="cert-modal">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeCertModal()">&times;</button>
+    <h2 style="margin-bottom: 8px; font-size:24px;">Claim Certificate</h2>
+    <p style="color:var(--t2); font-size:14px; margin-bottom:24px;">Enter your full name exactly as you want it to appear on your official completion certificate.</p>
+    <form onsubmit="generatePDF(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="cert-name" required placeholder="e.g. Raj Sharma">
+      </div>
+      <button type="submit" class="btn" style="width:100%; margin-top:8px;" id="cert-submit-btn">Download PDF</button>
+    </form>
+  </div>
+</div>
 
-    // --- DRAW CERTIFICATE ---
-    
-    // Geometric Borders
-    doc.rect(25, 20, pageWidth - 50, pageHeight - 40).lineWidth(3).stroke('#3B65E8');
-    doc.rect(32, 27, pageWidth - 64, pageHeight - 54).lineWidth(1).stroke('#E4E8F0');
-    
-    // Exact Width Calculation for perfectly centered 3-color Logo
-    doc.fontSize(28).font('Helvetica-Bold');
-    const word1 = doc.widthOfString('null');
-    const word2 = doc.widthOfString('tribe');
-    const word3 = doc.widthOfString('.');
-    const logoStartX = (pageWidth - (word1 + word2 + word3)) / 2;
+<main class="wrap" id="app"></main>
 
-    doc.fillColor('#3B65E8').text('null', logoStartX, 85, { lineBreak: false });
-    doc.fillColor('#1A1F2E').text('tribe', logoStartX + word1, 85, { lineBreak: false });
-    doc.fillColor('#F97316').text('.', logoStartX + word1 + word2, 85, { lineBreak: false });
+<footer><p><span class="brand" style="font-size:16px"><span class="n">null</span><span class="t">tribe</span><span class="d">.</span></span></p>
+<p>Information Security Risk Management · Phase 1 · Interactive introduction</p></footer>
 
-    // Sub-eyebrow
-    doc.fontSize(10).font('Helvetica-Bold').fillColor('#8892A4')
-       .text('SECURITY ORCHESTRATOR PLATFORM', 0, 125, { align: 'center', width: pageWidth, letterSpacing: 2 });
-    
-    // Certificate Title
-    doc.fontSize(38).font('Helvetica-Bold').fillColor('#1A1F2E')
-       .text('Certificate of Completion', 0, 185, { align: 'center', width: pageWidth });
-    
-    doc.fontSize(15).font('Helvetica').fillColor('#4A5568')
-       .text('This credential validates that', 0, 255, { align: 'center', width: pageWidth });
-    
-    // Recipient Name
-    doc.fontSize(32).font('Helvetica-Bold').fillColor('#3B65E8')
-       .text(req.user.name, 0, 295, { align: 'center', width: pageWidth });
-    
-    // Manual Underline
-    const nameWidth = doc.widthOfString(req.user.name);
-    doc.moveTo((pageWidth / 2) - (nameWidth / 2), 335)
-       .lineTo((pageWidth / 2) + (nameWidth / 2), 335)
-       .lineWidth(1.5).stroke('#3B65E8');
-    
-    // Course Details
-    doc.fontSize(14).font('Helvetica').fillColor('#4A5568')
-       .text('has successfully reviewed and mastered all interactive modules for:', 0, 370, { align: 'center', width: pageWidth });
-       
-    doc.fontSize(20).font('Helvetica-Bold').fillColor('#1A1F2E')
-       .text('Information Security Risk Fundamentals — Phase 1', 0, 400, { align: 'center', width: pageWidth });
-    
-    // Footer Metadata Blocks
-    const issueDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    const bottomY = 485;
-    
-    // Left: Date Block
-    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1A1F2E').text(`Date of Issuance:`, 80, bottomY);
-    doc.fontSize(12).font('Helvetica').fillColor('#4A5568').text(issueDate, 80, bottomY + 18);
-    
-    // Right: Issuer Authority Block
-    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1A1F2E')
-       .text('Issued & Verified by:', pageWidth - 320, bottomY, { align: 'right', width: 240 });
-    doc.fontSize(11).font('Helvetica').fillColor('#8892A4')
-       .text('nulltribe. Application Security Portal', pageWidth - 320, bottomY + 18, { align: 'right', width: 240 });
+<script>
+/* ================= CONTENT ================= */
+const FOUNDATIONS = [
+  {g:"blue",label:"The building blocks",items:[
+    ["Asset","what's worth protecting","Anything of value: cash, customer data, your records."],
+    ["Threat","what could cause harm","A thief, a flood, a hacker, a careless click."],
+    ["Vulnerability","the weakness","A gap a threat can exploit: an unlocked door, a shared password, no backup."],
+    ["Risk","the chance of harm","A threat hitting a vulnerability and harming an asset."],
+    ["Likelihood","how probable","The chance the harm actually happens."],
+    ["Impact","how bad","The damage done when it does."],
+    ["Control","the safeguard","Anything you add to cut likelihood or impact: a lock, a backup."],
+  ]},
+  {g:"teal",label:"What we're protecting — the C-I-A triad",items:[
+    ["Confidentiality","seen only by the right people","Information stays private to those allowed to see it."],
+    ["Integrity","accurate and unaltered","Information can't be changed or corrupted without notice."],
+    ["Availability","there when you need it","Systems and data are up and reachable when required."],
+  ]},
+  {g:"orange",label:"Four ways to treat a risk",items:[
+    ["Mitigate","reduce it","Add controls to cut the chance or the damage. Risk drops, never to zero."],
+    ["Avoid","remove it","Stop the risky activity entirely — always at a cost."],
+    ["Transfer","share it","Shift the burden to someone else: insurance, a vendor."],
+    ["Accept","live with it","Consciously decide to bear it — after analysis, not by hoping."],
+  ]},
+];
 
-    doc.end();
-});
+const SCENES = [
+  {
+    img: "https://illustrations.popsy.co/amber/lock.svg",
+    id:"door", title:"The Unlocked Back Door", hook:"₹50,000 and a latch that only looks shut.",
+    setup:["<p>Saturday night. Raj counts ₹50,000 — his best day in weeks — and drops it in the metal box under the counter. Front shutter down.</p><p>But the back delivery door? Its latch has been loose for months. It <em>looks</em> shut. He's tired. He goes home.</p>"],
+    incident:["<p>Nothing happens tonight.</p><p>But for eight hours, ₹50,000 sat behind a door anyone could lean on and open. No lock. No alarm. The only guard on duty was luck.</p>"],
+    q:{t:"Nothing was stolen. So what's the actual problem?", opts:[
+      {t:"No problem — nothing happened.", ok:false, fb:"It happened to work out. The danger was real all night; Raj just got lucky."},
+      {t:"Value + a weakness + someone who might exploit it = risk, whether or not it goes wrong.", ok:true, fb:"That gap between <em>could</em> and <em>did</em> is the whole idea of risk."},
+      {t:"He kept too much cash — the amount is the issue.", ok:false, fb:"Amount affects how bad a loss could be. But even small cash behind a broken latch is exposed. The weakness is the point."},
+    ]},
+    prompt:"That latch has bugged him for months. Tonight he deals with it.",
+    options:[
+      {s:"mitigate", a:"Fit a real lock and keep cash in a small safe.", o:"good",
+       c:"A proper lock goes on; cash goes in a bolted safe. Theft is now harder and far less rewarding.",
+       r:"Not impossible — just brought down to a level Raj can live with. <b>Mitigate:</b> add controls to cut the chance or the damage; some risk always remains."},
+      {s:"avoid", a:"Bank the cash nightly — keep none overnight.", o:"mixed",
+       c:"The box sleeps empty now. Nothing on-site to steal — but it's a bank run every single night.",
+       r:"He removed the asset, so the risk is gone. <b>Avoid:</b> stop the risky activity entirely — always at a cost (here, a daily errand)."},
+      {s:"transfer", a:"Leave it as-is, but insure against theft.", o:"mixed",
+       c:"The door stays weak. If robbed, the insurer pays — minus excess, after the claim, after the hassle.",
+       r:"The theft still happens; he's handed the <em>money</em>-loss to someone else. <b>Transfer:</b> the disruption and lost day stay with you."},
+      {s:"accept", a:"Do nothing — safe area, never a problem.", o:"bad",
+       c:"Most nights this works out. Until one night three weeks later, the box is empty by morning.",
+       r:"<b>Accept</b> is valid — but only after weighing likelihood against impact. Raj just hoped. Acceptance without analysis is gambling."},
+    ],
+    insight:"Risk exists <b>before</b> anything bad happens."
+  },
+  {
+    img: "https://illustrations.popsy.co/amber/remote-work.svg",
+    id:"wifi", title:"The Fake Wi-Fi Hotspot", hook:"An attacker who broke nothing — and just listened.",
+    setup:["<p>The café's free, open Wi-Fi keeps students glued to their seats, paying for refills on their phones.</p><p>One Tuesday, a stranger takes the corner seat. One coffee. Laptop open. He stays four hours.</p>"],
+    incident:["<p>Priya spots two networks now: <em>Sharma's Café Free WiFi</em> and <em>Sharma_Cafe_Free_WiFi</em>. One underscore off.</p><p>A regular's bank is asking about a payment she never made. The stranger set up a lookalike network, let phones join <em>his</em>, and just watched what passed through. He broke nothing.</p>"],
+    q:{t:"He never touched Raj's equipment. What let this happen?", opts:[
+      {t:"The café was targeted by a pro — nothing could be done.", ok:false, fb:"It works because it's easy and generic, not because Raj was special. And there was plenty he could've done."},
+      {t:"Open network + no way to tell the real one from a fake = easy to impersonate.", ok:true, fb:"The weakness was the <em>absence of any way to verify</em> the genuine network."},
+      {t:"Customers shouldn't pay on café Wi-Fi — their fault.", ok:false, fb:"They share some responsibility — but Raj advertised and invited them onto it. Offering something means owning some of its risk."},
+    ]},
+    prompt:"His customers' money, on his Wi-Fi, with his name on it. He sits down to decide.",
+    options:[
+      {s:"mitigate", a:"Password on the receipt, one clear official name, keep the till on a separate line.", o:"good",
+       c:"A copycat can still appear — but now there's a real network to check against, and less worth listening to.",
+       r:"Public Wi-Fi is never perfectly safe; he lowered both the chance and the reach. <b>Mitigate</b> in action."},
+      {s:"avoid", a:"Switch the free Wi-Fi off entirely.", o:"mixed",
+       c:"No café network to fake anymore. But within a fortnight the long-stay students drift down the road.",
+       r:"<b>Avoid:</b> the risk is gone — and so is the benefit it came bundled with. Sometimes worth it, sometimes not."},
+      {s:"transfer", a:"Keep it, add a disclaimer, lean on the app's fraud cover + cyber insurance.", o:"mixed",
+       c:"On paper the liability and payout now sit with the provider and insurer, not Raj.",
+       r:"But when customers say their money vanished 'at Sharma's,' no policy fixes that. <b>Transfer</b> moves money, not reputation."},
+      {s:"accept", a:"Call it a freak one-off and change nothing.", o:"bad",
+       c:"He never checked how easily the trick repeats (very) or how many pay from that corner daily (lots).",
+       r:"<b>Accept</b> without looking at likelihood or impact is the counterfeit version — it looks fine until it happens again."},
+    ],
+    insight:"A threat can be invisible — the attacker just <b>sat there and listened</b>."
+  },
+  {
+    img: "https://illustrations.popsy.co/amber/key.svg",
+    id:"insider", title:"The Angry Ex-Employee", hook:"A threat that walked out the door — and kept the keys.",
+    setup:["<p>Raj's proudest asset: a customer list — names, numbers, addresses, favourite orders. It lives in one app the whole team shares. One login. One password.</p><p>Everyone uses it — including Vikram, fired last month for skimming the till.</p>"],
+    incident:["<p>Nobody changed the password. Vikram's phone still had it saved.</p><p>Three weeks on, Raj's regulars start getting texts from a new café across town — by name, by usual order. Vikram walked out with two years of customers in his pocket. He broke nothing.</p>"],
+    q:{t:"Fired three weeks ago — why could Vikram still get in?", opts:[
+      {t:"He's dishonest — Raj hired the wrong person.", ok:false, fb:"His choices were his own, but that's not the <em>weakness</em>. Leaving changed nothing about his access — that's the gap."},
+      {t:"No step ever removed his access — the door was never locked behind him.", ok:true, fb:"A gap in <em>how things are done</em> is a vulnerability, just like a broken lock."},
+      {t:"Because the data was digital — paper would be safer.", ok:false, fb:"He could've photographed a notebook just as fast. The issue is shared, never-revoked access — not the format."},
+    ]},
+    prompt:"The data's already gone. What he decides now is about the next Vikram.",
+    options:[
+      {s:"mitigate", a:"Individual logins, remove access the day someone leaves, limit who can export.", o:"good",
+       c:"Access can now be pulled cleanly, and no single person can walk off with the whole list.",
+       r:"Insider risk can't vanish, but he cut both likelihood and impact. <b>Mitigate:</b> down to manageable, not zero."},
+      {s:"avoid", a:"Stop storing data he doesn't need — phone number only.", o:"mixed",
+       c:"Far less to hold, far less to lose. But the personal touch that drove repeat orders disappears too.",
+       r:"<b>Avoid:</b> you can't leak an address you never stored — but you give up the benefit that came with the data."},
+      {s:"transfer", a:"Move it to a reputable loyalty platform with a data-protection contract.", o:"mixed",
+       c:"Specialists handle the security and share the liability by contract — better than Raj could.",
+       r:"But they're still <em>his</em> customers; if the vendor leaks, his name's on the apology. <b>Transfer</b> ≠ absolution."},
+      {s:"accept", a:"Assume Vikram's had his fun — carry on.", o:"bad",
+       c:"Setting up logins sounds like a faff for four people. He changes nothing, and the next leaver finds the same open door.",
+       r:"He weighed nothing. <b>Accept</b> without analysis is just the problem, postponed."},
+    ],
+    insight:"Not every threat comes from outside. A <b>process gap</b> is a vulnerability."
+  },
+  {
+    img: "https://illustrations.popsy.co/amber/server.svg",
+    id:"flood", title:"The Monsoon and the Server", hook:"No thief, no hacker — just rain and a single copy.",
+    setup:["<p>Everything the café runs on — accounts, suppliers, two years of orders, the customer list — sits on one old PC in the ground-floor back office. No backup anywhere.</p><p>It's rained for four days straight. The back drain is slow.</p>"],
+    incident:["<p>That night the drain gives up. Water spreads across the floor to the low table where the PC sits — still switched on.</p><p>By dawn it's dead, and everything with it. No thief, no hacker. Just rain, and the only copy of everything sitting where the water could reach.</p>"],
+    q:{t:"The flood killed a computer. What made it a <em>total</em> loss?", opts:[
+      {t:"The rain — an act of nature no one could stop.", ok:false, fb:"Rain broke a <em>machine</em>. What made it a catastrophe was that the machine held the <em>only</em> copy."},
+      {t:"Everything lived in one place with no copy — nothing to fall back on.", ok:true, fb:"One machine, one copy = a single point of failure. The missing backup was the real weakness."},
+      {t:"The PC was old — newer hardware wouldn't fail.", ok:false, fb:"A brand-new PC in the same flood dies just as dead. Being the <em>only copy</em> was the vulnerability, not the age."},
+    ]},
+    prompt:"Ankle-deep in water, Raj knows this can never happen again. The question is how.",
+    options:[
+      {s:"mitigate", a:"Automatic backups — cloud + an off-site drive — and lift the PC off the floor.", o:"good",
+       c:"The data now lives in three places. A future flood kills hardware, not information. Catastrophe becomes a bad week.",
+       r:"<b>Mitigate:</b> note this cuts the <em>impact</em>, not the odds. Controls can target either lever — or both."},
+      {s:"avoid", a:"Move the accounts and records to online services, off the local machine.", o:"mixed",
+       c:"No fragile single box in a flood zone. Cost: subscriptions, an internet reliance, a short learning curve.",
+       r:"<b>Avoid:</b> he removed the vulnerable activity — and swapped one set of risks for a smaller, different one."},
+      {s:"transfer", a:"Insure the equipment and lost-business days.", o:"bad",
+       c:"Money back for the PC and the downtime. But the thing he actually lost wasn't really money.",
+       r:"No payout restores two years of un-backed-up records. <b>Transfer</b> handles money-losses; some losses were never money."},
+      {s:"accept", a:"Dry it out, hope, deal with it if it recurs.", o:"bad",
+       c:"He just watched this erase two irreplaceable years — and sets up no backup, changes nothing about where data lives.",
+       r:"When harm is this severe, 'accept and hope' isn't management. <b>Accept</b> needs analysis and a loss you could bear."},
+    ],
+    insight:"A threat needn't be human — and a <b>missing safeguard</b> (no backup) is itself a vulnerability."
+  },
+];
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`[nulltribe API] Orchestrator online at port ${PORT}`));
+const SLABEL={mitigate:"Mitigate",transfer:"Transfer",avoid:"Avoid",accept:"Accept"};
+
+const MAP=[
+  ["Asset","worth protecting","The <b>cash</b>, the <b>payment details</b>, the <b>customer list</b>, two years of <b>records</b>."],
+  ["Vulnerability","the weakness","The <b>loose latch</b>, the <b>open Wi-Fi</b>, the <b>shared password</b>, the <b>un-backed-up PC</b>."],
+  ["Threat","what could go wrong","A <b>break-in</b>, a <b>lookalike network</b>, a <b>disgruntled ex-employee</b>, a <b>flood</b>."],
