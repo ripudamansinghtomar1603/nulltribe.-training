@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- PDF Generation Library (1-Page Guarantee) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -33,29 +34,23 @@
   .eyebrow.o{color:var(--orange)}
 
   /* --- ZEBEYOND ERP STYLE ANIMATIONS --- */
-  .reveal-on-scroll {
-    opacity: 0;
-    transform: translateY(50px);
-    transition: opacity 0.7s ease, transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-    will-change: opacity, transform;
-  }
-  .reveal-on-scroll.is-visible {
-    opacity: 1;
-    transform: translateY(0);
+  .animate-in {
+    animation: slideUpFadeERP 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   
-  .delay-1 { transition-delay: 0.05s; }
-  .delay-2 { transition-delay: 0.15s; }
-  .delay-3 { transition-delay: 0.25s; }
-  .delay-4 { transition-delay: 0.35s; }
-  .delay-5 { transition-delay: 0.45s; }
+  .delay-1 { animation-delay: 0.05s; }
+  .delay-2 { animation-delay: 0.15s; }
+  .delay-3 { animation-delay: 0.25s; }
+  .delay-4 { animation-delay: 0.35s; }
+  .delay-5 { animation-delay: 0.45s; }
   
   @keyframes slideUpFadeERP {
     from { opacity: 0; transform: translateY(40px); }
     to { opacity: 1; transform: translateY(0); }
   }
-  .screen{display:none;animation:slideUpFadeERP 1s cubic-bezier(0.16, 1, 0.3, 1) both;padding:60px 0 100px}
-  .screen.on{display:block}
+  
+  .screen{display:none; padding:60px 0 100px}
+  .screen.on{display:block;}
 
   @keyframes slowPan {
     0% { transform: scale(1.02) translate(0, 0); }
@@ -73,6 +68,7 @@
   .brand{font-weight:700;font-size:20px;letter-spacing:-.02em;text-decoration:none;cursor:pointer;transition: opacity 0.3s ease;}
   .brand:hover {opacity: 0.7;}
   .brand .n{color:var(--blue)}.brand .t{color:var(--navy)}.brand .d{color:var(--orange)}
+  .brand .sub{font-family:var(--mono);font-size:0.65rem;font-weight:700;color:var(--muted);letter-spacing:0.12em;text-transform:uppercase;margin-left:0.5rem;vertical-align:middle;position:relative;top:-2px;}
   .prog{display:flex;gap:10px}
   .pip{width:12px;height:12px;border-radius:50%;background:var(--border);transition:all 0.8s cubic-bezier(0.16, 1, 0.3, 1)}
   .pip.done{background:var(--green);}
@@ -125,7 +121,7 @@
   .card-scn{display:flex;flex-direction:column;text-align:left;background:var(--paper);border:2px solid transparent;border-radius:24px;padding:0;cursor:pointer;transition:all 0.6s cubic-bezier(0.16, 1, 0.3, 1);position:relative;overflow:hidden;box-shadow:var(--sh-soft)}
   .card-scn:hover{border-color:var(--border);transform:translateY(-6px);box-shadow:var(--sh)}
   .card-scn-img{height:220px;width:100%;overflow:hidden;position:relative;background:#EAF0FF}
-  .card-scn-img img{width:100%;height:100%;object-fit:contain;padding:12px;transition:transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)} 
+  .card-scn-img img{width:100%;height:100%;object-fit:cover;transition:transform 1.5s cubic-bezier(0.16, 1, 0.3, 1)} 
   .card-scn:hover .card-scn-img img{transform:scale(1.04)}
   .card-scn-body{padding:32px;}
   .card-scn .idx{font-family:var(--mono);font-weight:600;font-size:12.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
@@ -144,7 +140,7 @@
 
   /* ---------- SCENE PLAYER ---------- */
   .hero-banner {height:300px;border-radius:24px;overflow:hidden;margin-bottom:32px;box-shadow:var(--sh-soft);position:relative;background:#EAF0FF;display:grid;place-items:center}
-  .hero-banner img {width:100%;height:100%;object-fit:contain;padding:20px;animation:slowPan 20s infinite alternate ease-in-out;}
+  .hero-banner img {width:100%;height:100%;object-fit:cover;animation:slowPan 20s infinite alternate ease-in-out;}
 
   .card{background:var(--paper);border:none;border-radius:24px;box-shadow:var(--sh-soft);padding:40px;margin:24px auto; transition: box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1)}
   .card:hover{box-shadow: var(--sh)}
@@ -223,13 +219,16 @@
 <body>
 
 <div class="top"><div class="wrap">
-  <span class="brand" onclick="goHome()"><span class="n">null</span><span class="t">tribe</span><span class="d">.</span></span>
+  <span class="brand" onclick="goHome()">
+    <span class="n">null</span><span class="t">tribe</span><span class="d">.</span><span class="sub">TRAININGS</span>
+  </span>
   <div class="prog" aria-hidden="true">
     <span class="pip" data-p="0"></span><span class="pip" data-p="1"></span>
     <span class="pip" data-p="2"></span><span class="pip" data-p="3"></span>
   </div>
 </div></div>
 
+<!-- Certificate Name Modal -->
 <div class="modal-overlay" id="cert-modal">
   <div class="modal-box">
     <button class="modal-close" onclick="closeCertModal()">&times;</button>
@@ -247,7 +246,7 @@
 
 <main class="wrap" id="app"></main>
 
-<footer><p><span class="brand" style="font-size:16px"><span class="n">null</span><span class="t">tribe</span><span class="d">.</span></span></p>
+<footer><p><span class="brand" style="font-size:16px"><span class="n">null</span><span class="t">tribe</span><span class="d">.</span><span class="sub">TRAININGS</span></span></p>
 <p>Information Security Risk Management · Phase 1 · Interactive introduction</p></footer>
 
 <script>
@@ -277,7 +276,7 @@ const FOUNDATIONS = [
 
 const SCENES = [
   {
-    img: "https://illustrations.popsy.co/amber/lock.svg",
+    img: "https://images.unsplash.com/photo-1614064641913-6b71f3bb3343?auto=format&fit=crop&w=800&q=80",
     id:"door", title:"The Unlocked Back Door", hook:"₹50,000 and a latch that only looks shut.",
     setup:["<p>Saturday night. Raj counts ₹50,000 — his best day in weeks — and drops it in the metal box under the counter. Front shutter down.</p><p>But the back delivery door? Its latch has been loose for months. It <em>looks</em> shut. He's tired. He goes home.</p>"],
     incident:["<p>Nothing happens tonight.</p><p>But for eight hours, ₹50,000 sat behind a door anyone could lean on and open. No lock. No alarm. The only guard on duty was luck.</p>"],
@@ -304,7 +303,7 @@ const SCENES = [
     insight:"Risk exists <b>before</b> anything bad happens."
   },
   {
-    img: "https://illustrations.popsy.co/amber/remote-work.svg",
+    img: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
     id:"wifi", title:"The Fake Wi-Fi Hotspot", hook:"An attacker who broke nothing — and just listened.",
     setup:["<p>The café's free, open Wi-Fi keeps students glued to their seats, paying for refills on their phones.</p><p>One Tuesday, a stranger takes the corner seat. One coffee. Laptop open. He stays four hours.</p>"],
     incident:["<p>Priya spots two networks now: <em>Sharma's Café Free WiFi</em> and <em>Sharma_Cafe_Free_WiFi</em>. One underscore off.</p><p>A regular's bank is asking about a payment she never made. The stranger set up a lookalike network, let phones join <em>his</em>, and just watched what passed through. He broke nothing.</p>"],
@@ -331,7 +330,7 @@ const SCENES = [
     insight:"A threat can be invisible — the attacker just <b>sat there and listened</b>."
   },
   {
-    img: "https://illustrations.popsy.co/amber/key.svg",
+    img: "https://images.unsplash.com/photo-1507925922893-a981ad6f663c?auto=format&fit=crop&w=800&q=80",
     id:"insider", title:"The Angry Ex-Employee", hook:"A threat that walked out the door — and kept the keys.",
     setup:["<p>Raj's proudest asset: a customer list — names, numbers, addresses, favourite orders. It lives in one app the whole team shares. One login. One password.</p><p>Everyone uses it — including Vikram, fired last month for skimming the till.</p>"],
     incident:["<p>Nobody changed the password. Vikram's phone still had it saved.</p><p>Three weeks on, Raj's regulars start getting texts from a new café across town — by name, by usual order. Vikram walked out with two years of customers in his pocket. He broke nothing.</p>"],
@@ -358,7 +357,7 @@ const SCENES = [
     insight:"Not every threat comes from outside. A <b>process gap</b> is a vulnerability."
   },
   {
-    img: "https://illustrations.popsy.co/amber/server.svg",
+    img: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80",
     id:"flood", title:"The Monsoon and the Server", hook:"No thief, no hacker — just rain and a single copy.",
     setup:["<p>Everything the café runs on — accounts, suppliers, two years of orders, the customer list — sits on one old PC in the ground-floor back office. No backup anywhere.</p><p>It's rained for four days straight. The back drain is slow.</p>"],
     incident:["<p>That night the drain gives up. Water spreads across the floor to the low table where the PC sits — still switched on.</p><p>By dawn it's dead, and everything with it. No thief, no hacker. Just rain, and the only copy of everything sitting where the water could reach.</p>"],
@@ -403,26 +402,15 @@ const MAP=[
 const app=document.getElementById('app');
 const st={view:'home',scene:0,phase:'setup',choice:null,done:[false,false,false,false]};
 
-function initScrollObserver() {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
-  document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
-}
-
 function pips(){document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('done',st.done[i]));}
 function allDone(){return st.done.every(Boolean);}
 
-function render(){
-  window.scrollTo({top:0});
+function render(scrollToTop = true){
   app.innerHTML=st.view==='home'?home():scene();
   pips();
-  setTimeout(initScrollObserver, 50);
+  if (scrollToTop) {
+    window.scrollTo({top:0});
+  }
 }
 
 /* ----- FRONTEND PDF GENERATION (jsPDF) ----- */
@@ -533,7 +521,7 @@ function generatePDF(e) {
   
   doc.setFont("helvetica", "normal");
   doc.setTextColor(136, 146, 164);
-  doc.text("nulltribe. Application Security Portal", width - 80, bottomY + 20, { align: "right" });
+  doc.text("nulltribe.", width - 80, bottomY + 20, { align: "right" });
 
   // Download logic
   setTimeout(() => {
@@ -549,26 +537,27 @@ function generatePDF(e) {
 function home(){
   let certHtml = '';
   if(allDone()) {
-    certHtml = `<div style="margin-top:24px"><button class="btn" style="background:var(--orange)" onclick="openCertModal()">Claim Certificate</button></div>`;
+    certHtml = `<div style="margin-top:24px"><button class="btn animate-in delay-2" style="background:var(--orange)" onclick="openCertModal()">Claim Certificate</button></div>`;
   }
 
   return `
   <section class="screen on">
-    <div class="center reveal-on-scroll text-constrain" style="padding-top:20px">
+    <div class="center animate-in text-constrain" style="padding-top:20px">
       <div class="eyebrow">Risk Fundamentals · Phase 1 · No experience needed</div>
       <h1>A Day at Sharma's Café</h1>
       <p class="lede">Learn what risk really means — first the words, then four moments where <b>you</b> make the call and watch what happens.</p>
     </div>
 
+    <!-- FOUNDATIONS -->
     <div class="sect">
-      <div class="sect-h reveal-on-scroll"><span class="num">01</span><h2>Start with the words</h2></div>
-      <p class="sect-sub reveal-on-scroll delay-1">Tap any card to reveal what it means. Skim these, then put them to work below.</p>
+      <div class="sect-h animate-in delay-1"><span class="num">01</span><h2>Start with the words</h2></div>
+      <p class="sect-sub animate-in delay-1">Tap any card to reveal what it means. Skim these, then put them to work below.</p>
       
-      <div class="reveal-on-scroll delay-1" style="margin-bottom:32px">
+      <div class="animate-in delay-1" style="margin-bottom:32px">
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[0].label}</div>
         <div class="grid">
           ${FOUNDATIONS[0].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[0].g} reveal-on-scroll delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile g-${FOUNDATIONS[0].g} animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -577,11 +566,11 @@ function home(){
         </div>
       </div>
 
-      <div class="reveal-on-scroll delay-1" style="margin-bottom:32px">
+      <div class="animate-in delay-1" style="margin-bottom:32px">
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[1].label}</div>
         <div class="grid">
           ${FOUNDATIONS[1].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[1].g} reveal-on-scroll delay-${(ii%3)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile g-${FOUNDATIONS[1].g} animate-in delay-${(ii%3)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -590,11 +579,11 @@ function home(){
         </div>
       </div>
 
-      <div class="reveal-on-scroll delay-1" style="margin-bottom:32px">
+      <div class="animate-in delay-1" style="margin-bottom:32px">
         <div style="font-family:var(--mono);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px">${FOUNDATIONS[2].label}</div>
         <div class="grid">
           ${FOUNDATIONS[2].items.map((it,ii)=>`
-            <button class="tile g-${FOUNDATIONS[2].g} reveal-on-scroll delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
+            <button class="tile g-${FOUNDATIONS[2].g} animate-in delay-${(ii%4)+1}" onclick="this.classList.toggle('open')">
               <span class="dot"></span>
               <div class="term">${it[0]}</div>
               <div class="hint">${it[1]} · tap</div>
@@ -603,9 +592,9 @@ function home(){
         </div>
       </div>
 
-      <div class="formula reveal-on-scroll text-constrain"><span class="a">Risk</span> <span class="op">=</span> a threat exploiting a <span class="v">vulnerability</span> to harm an <span class="a">asset</span> <span class="op">— weighed by</span> likelihood <span class="op">×</span> impact</div>
+      <div class="formula animate-in text-constrain"><span class="a">Risk</span> <span class="op">=</span> a threat exploiting a <span class="v">vulnerability</span> to harm an <span class="a">asset</span> <span class="op">— weighed by</span> likelihood <span class="op">×</span> impact</div>
 
-      <div class="worksheet reveal-on-scroll delay-1 text-constrain" title="Coming soon">
+      <div class="worksheet animate-in delay-1 text-constrain" title="Coming soon">
         <div class="ic">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8892A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
@@ -615,12 +604,13 @@ function home(){
       </div>
     </div>
 
-    <div class="sect">
-      <div class="sect-h reveal-on-scroll"><span class="num">02</span><h2>Now, you run the café</h2></div>
-      <p class="sect-sub reveal-on-scroll delay-1">Pick any scenario. Make Raj's decision. Come back and pick the next — in any order.</p>
+    <!-- SCENARIO HUB -->
+    <div class="sect" id="scenario-hub">
+      <div class="sect-h animate-in"><span class="num">02</span><h2>Now, you run the café</h2></div>
+      <p class="sect-sub animate-in delay-1">Pick any scenario. Make Raj's decision. Come back and pick the next — in any order.</p>
       <div class="scn-grid">
         ${SCENES.map((s,i)=>`
-          <button class="card-scn ${st.done[i]?'done':''} reveal-on-scroll delay-${(i%2)+1}" onclick="openScene(${i})">
+          <button class="card-scn ${st.done[i]?'done':''} animate-in delay-${(i%2)+1}" onclick="openScene(${i})">
             <div class="check"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
             <div class="card-scn-img"><img src="${s.img}" alt="Scenario Graphic" /></div>
             <div class="card-scn-body">
@@ -633,19 +623,20 @@ function home(){
       </div>
     </div>
 
+    <!-- TERMINOLOGY -->
     <div class="sect" id="terminology" class="${allDone()?'unlocked':''}">
-      <div class="sect-h reveal-on-scroll"><span class="num">03</span><h2>You were speaking security all along</h2></div>
-      <p class="sect-sub reveal-on-scroll delay-1">No jargon in the story — yet you used every core idea. Here's what each piece was called.</p>
+      <div class="sect-h animate-in"><span class="num">03</span><h2>You were speaking security all along</h2></div>
+      <p class="sect-sub animate-in delay-1">No jargon in the story — yet you used every core idea. Here's what each piece was called.</p>
       <div class="map">
-        ${MAP.map((m,i)=>`<div class="mrow reveal-on-scroll delay-${(i%2)+1}"><div class="mterm">${m[0]}<small>${m[1]}</small></div><div class="mdef">${m[2]}</div></div>`).join('')}
+        ${MAP.map((m,i)=>`<div class="mrow animate-in delay-${(i%2)+1}"><div class="mterm">${m[0]}<small>${m[1]}</small></div><div class="mdef">${m[2]}</div></div>`).join('')}
       </div>
-      <div class="closing reveal-on-scroll text-constrain">
-        <p class="big">There's no single right answer. What matters is a <b>conscious, informed decision</b> — that is risk management.</p>
+      <div class="closing animate-in text-constrain">
+        <p class="big">There's no single right answer. What matters is a <b>conscious, informed decision</b> — that is management.</p>
         <p class="sub">Mitigate, transfer, avoid, accept: each is valid in context. The failure is never the choice — it's choosing without looking.</p>
         ${certHtml}
       </div>
     </div>
-    ${allDone()?'':`<div class="lock-note reveal-on-scroll text-constrain" id="lockNote">
+    ${allDone()?'':`<div class="lock-note animate-in text-constrain" id="lockNote">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8892A4" stroke-width="2.5"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
       <span style="font-family:var(--sans)">Finish all four scenarios to unlock the terminology map. <b style="color:var(--navy);margin-left:8px">${st.done.filter(Boolean).length}/4 done</b></span></div>`}
   </section>`;
@@ -656,61 +647,64 @@ function scene(){
   const s=SCENES[st.scene], n=st.scene+1;
   if(st.phase==='setup') return `
     <section class="screen on">
-      <div class="eyebrow reveal-on-scroll text-constrain">Scenario ${n}</div>
-      <h2 class="reveal-on-scroll delay-1 text-constrain">${s.title}</h2>
-      <div class="hero-banner reveal-on-scroll delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
-      <div class="card reveal-on-scroll delay-3 text-constrain"><div class="story">${s.setup.join('')}</div></div>
-      <div class="center reveal-on-scroll delay-4"><button class="btn" onclick="ph('incident')">Continue →</button></div>
+      <div class="eyebrow animate-in text-constrain">Scenario ${n}</div>
+      <h2 class="animate-in delay-1 text-constrain">${s.title}</h2>
+      <div class="hero-banner animate-in delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
+      <div class="card animate-in delay-3 text-constrain"><div class="story">${s.setup.join('')}</div></div>
+      <div class="center animate-in delay-4"><button class="btn" onclick="ph('incident')">Continue →</button></div>
     </section>`;
   if(st.phase==='incident') return `
     <section class="screen on">
-      <div class="eyebrow o reveal-on-scroll text-constrain">Scenario ${n} · What happens</div>
-      <h2 class="reveal-on-scroll delay-1 text-constrain">${s.title}</h2>
-      <div class="hero-banner reveal-on-scroll delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
-      <div class="card reveal-on-scroll delay-3 text-constrain"><span class="flag">The incident</span><div class="story">${s.incident.join('')}</div></div>
-      <div class="center reveal-on-scroll delay-4"><button class="btn" onclick="ph('q')">Think first →</button></div>
+      <div class="eyebrow o animate-in text-constrain">Scenario ${n} · What happens</div>
+      <h2 class="animate-in delay-1 text-constrain">${s.title}</h2>
+      <div class="hero-banner animate-in delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
+      <div class="card animate-in delay-3 text-constrain"><span class="flag">The incident</span><div class="story">${s.incident.join('')}</div></div>
+      <div class="center animate-in delay-4"><button class="btn" onclick="ph('q')">Think first →</button></div>
     </section>`;
   if(st.phase==='q'){const q=s.q;return `
     <section class="screen on">
-      <div class="eyebrow reveal-on-scroll text-constrain">Scenario ${n} · Quick check</div>
-      <h2 class="reveal-on-scroll delay-1 text-constrain">${s.title}</h2>
-      <div class="check-q reveal-on-scroll delay-2 text-constrain"><p class="q">${q.t}</p><div id="qo">
+      <div class="eyebrow animate-in text-constrain">Scenario ${n} · Quick check</div>
+      <h2 class="animate-in delay-1 text-constrain">${s.title}</h2>
+      <div class="hero-banner animate-in delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
+      <div class="check-q animate-in delay-3 text-constrain"><p class="q">${q.t}</p><div id="qo">
         ${q.opts.map((o,i)=>`<button class="qopt" onclick="pickQ(${i})">${o.t}</button><div class="qfb" id="qfb${i}">${o.fb}</div>`).join('')}
       </div></div>
       <div class="center" id="qnext" style="display:none"><button class="btn" onclick="ph('decide')">Now you decide →</button></div>
     </section>`;}
   if(st.phase==='decide') return `
     <section class="screen on">
-      <div class="eyebrow reveal-on-scroll text-constrain">Scenario ${n} · Your call</div>
-      <h2 class="reveal-on-scroll delay-1 text-constrain">${s.title}</h2>
-      <div class="card reveal-on-scroll delay-2 text-constrain" style="padding:32px 36px"><div class="story" style="font-size:18.5px"><p style="margin:0">${s.prompt}</p></div></div>
-      <p class="dhead reveal-on-scroll delay-3 text-constrain">You are Raj. What do you do?</p>
-      <p class="dsub reveal-on-scroll delay-3 text-constrain">Four honest options — pick what you'd actually choose.</p>
-      <div class="opts reveal-on-scroll delay-4 text-constrain">${s.options.map((o,i)=>`<button class="opt" onclick="pickC(${i})"><span class="lbl"><span class="n">${i+1}</span><span class="a">${o.a}</span></span></button>`).join('')}</div>
+      <div class="eyebrow animate-in text-constrain">Scenario ${n} · Your call</div>
+      <h2 class="animate-in delay-1 text-constrain">${s.title}</h2>
+      <div class="hero-banner animate-in delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
+      <div class="card animate-in delay-3 text-constrain" style="padding:32px 36px"><div class="story" style="font-size:18.5px"><p style="margin:0">${s.prompt}</p></div></div>
+      <p class="dhead animate-in delay-4 text-constrain">You are Raj. What do you do?</p>
+      <p class="dsub animate-in delay-4 text-constrain">Four honest options — pick what you'd actually choose.</p>
+      <div class="opts animate-in delay-5 text-constrain">${s.options.map((o,i)=>`<button class="opt" onclick="pickC(${i})"><span class="lbl"><span class="n">${i+1}</span><span class="a">${o.a}</span></span></button>`).join('')}</div>
     </section>`;
   if(st.phase==='result'){
     const o=s.options[st.choice], others=s.options.map((op,i)=>({op,i})).filter(x=>x.i!==st.choice);
     return `
     <section class="screen on text-constrain">
-      <div class="eyebrow reveal-on-scroll">Scenario ${n} · What happened next</div>
-      <h2 class="reveal-on-scroll delay-1">${s.title}</h2>
-      <div class="conseq ${o.o} reveal-on-scroll delay-2">${o.c}</div>
-      <div class="reveal reveal-on-scroll delay-3"><span class="badge ${o.s}">${SLABEL[o.s]}</span><p>${o.r}</p></div>
-      <div class="peek reveal-on-scroll delay-4"><div class="pt">See the paths you didn't take</div>
+      <div class="eyebrow animate-in">Scenario ${n} · What happened next</div>
+      <h2 class="animate-in delay-1">${s.title}</h2>
+      <div class="hero-banner animate-in delay-2"><img src="${s.img}" alt="Scenario Banner" /></div>
+      <div class="conseq ${o.o} animate-in delay-3">${o.c}</div>
+      <div class="reveal animate-in delay-4"><span class="badge ${o.s}">${SLABEL[o.s]}</span><p>${o.r}</p></div>
+      <div class="peek animate-in delay-5"><div class="pt">See the paths you didn't take</div>
         <div class="opts" style="grid-template-columns:1fr;">${others.map(({op,i})=>`
           <button class="opt" onclick="peek(${i})"><span class="lbl"><span class="n">${i+1}</span><span class="a">${op.a}</span></span>
             <div class="pbody" id="pb${i}"><div class="ps ${op.s}">If you'd chosen this → ${SLABEL[op.s]}</div><p>${op.c} ${op.r}</p></div>
           </button>`).join('')}</div>
       </div>
-      <div class="insight reveal-on-scroll delay-5"><span class="b">💡</span><span class="x">${s.insight}</span></div>
-      <div class="center reveal-on-scroll delay-5" style="margin-top:40px"><button class="btn ghost" onclick="finish()">← Back to scenarios</button></div>
+      <div class="insight animate-in delay-5"><span class="b">💡</span><span class="x">${s.insight}</span></div>
+      <div class="center animate-in delay-5" style="margin-top:40px"><button class="btn ghost" onclick="finish()">← Back to scenarios</button></div>
     </section>`;
   }
 }
 
 /* ----- interactions ----- */
-function openScene(i){st.view='scene';st.scene=i;st.phase='setup';st.choice=null;render();}
-function ph(p){st.phase=p;render();}
+function openScene(i){st.view='scene';st.scene=i;st.phase='setup';st.choice=null;render(true);}
+function ph(p){st.phase=p;render(true);}
 function pickQ(i){
   const q=SCENES[st.scene].q, btns=document.querySelectorAll('#qo .qopt');
   btns.forEach(b=>b.style.pointerEvents='none');
@@ -719,28 +713,33 @@ function pickQ(i){
   const ci=q.opts.findIndex(o=>o.ok); if(ci!==i)document.getElementById('qfb'+ci).classList.add('show');
   document.getElementById('qnext').style.display='block';
 }
-function pickC(i){st.choice=i;st.phase='result';render();}
+function pickC(i){st.choice=i;st.phase='result';render(true);}
 function peek(i){const b=document.getElementById('pb'+i);b.classList.toggle('show');}
 
 function finish(){
   st.done[st.scene] = true; 
   st.view = 'home'; 
-  render();
+  render(false); // Do not scroll to the absolute top of the page
   
   if(allDone()){
     const el=document.getElementById('terminology'); 
     if(el){
       el.classList.add('unlocked'); 
       setTimeout(()=>el.scrollIntoView({behavior:'smooth'}),200);
-      setTimeout(initScrollObserver, 400);
+    }
+  } else {
+    // If there are still scenarios left, scroll to the scenario hub
+    const hub = document.getElementById('scenario-hub');
+    if(hub) {
+      setTimeout(() => hub.scrollIntoView({behavior:'smooth', block:'start'}), 50);
     }
   }
 }
 
-function goHome(){st.view='home';render();}
+function goHome(){st.view='home';render(true);}
 
 // Initial Boot
-render();
+render(true);
 </script>
 </body>
 </html>
